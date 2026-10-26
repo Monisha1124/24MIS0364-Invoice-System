@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_REPO = 'REPLACE_WITH_DOCKERHUB_USERNAME/24mis0364-invoice-system'
+        DOCKERHUB_REPO = 'monisha1124/24mis0364-invoice-system'
         K8S_NAMESPACE = 'default'
     }
     stages {
