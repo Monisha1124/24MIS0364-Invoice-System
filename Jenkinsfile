@@ -7,7 +7,6 @@ pipeline {
     }
 
     stages {
-
         stage('1. Source Code Checkout') {
             steps {
                 echo 'Source code checked out from GitHub'
@@ -17,14 +16,12 @@ pipeline {
 
         stage('2. Build Application') {
             steps {
-                echo 'Building application inside Docker'
                 bat 'docker build --build-arg APP_VERSION=v3 -t invoice-system-test .'
             }
         }
 
         stage('3. Run Unit Tests') {
             steps {
-                echo 'Running Python tests inside Docker'
                 bat 'docker run --rm invoice-system-test python -m pytest -q'
             }
         }
