@@ -34,21 +34,12 @@ pipeline {
             }
         }
 
-        stage('5. Push Images to DockerHub') {
+       stage('5. Push Images to DockerHub') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKERHUB_USER',
-                    passwordVariable: 'DOCKERHUB_TOKEN'
-                )]) {
-                    bat 'echo %DOCKERHUB_TOKEN%| docker login -u %DOCKERHUB_USER% --password-stdin'
-                    bat 'docker push %IMAGE%:v1'
-                    bat 'docker push %IMAGE%:v2'
-                    bat 'docker push %IMAGE%:v3'
-                    bat 'docker logout'
-                }
-            }
-        }
+        echo 'Docker images built locally. DockerHub push temporarily skipped due to authentication issue.'
+        bat 'docker image ls'
+    }
+}
 
         stage('6. Deploy to Kubernetes') {
             steps {
