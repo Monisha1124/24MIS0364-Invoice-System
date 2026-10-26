@@ -1,53 +1,84 @@
+
 pipeline {
     agent any
+
     environment {
-        DOCKERHUB_REPO = 'monisha1124/24mis0364-invoice-system'
-        K8S_NAMESPACE = 'default'
+        IMAGE = 'monisha1124/24mis0364-invoice-system'
     }
+
     stages {
+
         stage('1. Source Code Checkout') {
-            steps { checkout scm }
-        }
-        stage('2. Build Application') {
-            steps { bat 'python -m pip install -r requirements.txt' }
-        }
-        stage('3. Run Unit Tests') {
-            steps { bat 'python -m pytest -v' }
-        }
-        stage('4. Build Docker Images') {
             steps {
-                bat 'docker build --build-arg APP_VERSION=v1 -t %DOCKERHUB_REPO%:v1 .'
-                bat 'docker build --build-arg APP_VERSION=v2 -t %DOCKERHUB_REPO%:v2 .'
-                bat 'docker build --build-arg APP_VERSION=v3 -t %DOCKERHUB_REPO%:v3 .'
+                echo 'Source code checked out from GitHub'
+                bat 'git rev-parse --short HEAD'
             }
         }
+
+        stage('2. Build Application') {
+            steps {
+                echo 'Building application inside Docker'
+                bat 'docker build --build-arg APP_VERSION=v3 -t invoice-system-test .'
+            }
+        }
+
+        stage('3. Run Unit Tests') {
+            steps {
+                echo 'Running Python tests inside Docker'
+                bat 'docker run --rm invoice-system-test python -m pytest -q'
+            }
+        }
+
+        stage('4. Build Docker Images') {
+            steps {
+                bat 'docker build --build-arg APP_VERSION=v1 -t %IMAGE%:v1 .'
+                bat 'docker build --build-arg APP_VERSION=v2 -t %IMAGE%:v2 .'
+                bat 'docker build --build-arg APP_VERSION=v3 -t %IMAGE%:v3 .'
+            }
+        }
+
         stage('5. Push Images to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_TOKEN')]) {
-                    bat 'echo %DH_TOKEN%| docker login -u %DH_USER% --password-stdin'
-                    bat 'docker push %DOCKERHUB_REPO%:v1'
-                    bat 'docker push %DOCKERHUB_REPO%:v2'
-                    bat 'docker push %DOCKERHUB_REPO%:v3'
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKERHUB_USER',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    bat 'echo %DOCKERHUB_TOKEN%| docker login -u %DOCKERHUB_USER% --password-stdin'
+                    bat 'docker push %IMAGE%:v1'
+                    bat 'docker push %IMAGE%:v2'
+                    bat 'docker push %IMAGE%:v3'
+                    bat 'docker logout'
                 }
             }
         }
+
         stage('6. Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f k8s/'
+                bat 'kubectl apply -f k8s/invoice-v1.yaml'
+                bat 'kubectl apply -f k8s/invoice-v2.yaml'
+                bat 'kubectl apply -f k8s/invoice-v3.yaml'
             }
         }
+
         stage('7. Verify Deployment') {
             steps {
-                bat 'kubectl rollout status deployment/invoice-v1'
-                bat 'kubectl rollout status deployment/invoice-v2'
-                bat 'kubectl rollout status deployment/invoice-v3'
-                bat 'kubectl get deployments,services,pods'
+                bat 'kubectl rollout status deployment/invoice-v1 --timeout=120s'
+                bat 'kubectl rollout status deployment/invoice-v2 --timeout=120s'
+                bat 'kubectl rollout status deployment/invoice-v3 --timeout=120s'
+                bat 'kubectl get deployments'
+                bat 'kubectl get services'
             }
         }
     }
+
     post {
-        always { bat 'docker image ls' }
-        success { echo 'Invoice System pipeline completed successfully.' }
-        failure { echo 'Pipeline failed. Review the stage and console output.' }
+        success {
+            echo 'Invoice System CI/CD Pipeline Completed Successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Review the stage and console output.'
+            bat 'docker image ls'
+        }
     }
 }

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: invoice
-          image: YOUR_DOCKERHUB_USERNAME/24mis0364-invoice-system:v1
+          image: monisha1124/24mis0364-invoice-system:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
