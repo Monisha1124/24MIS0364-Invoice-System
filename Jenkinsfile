@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         IMAGE = 'monisha1124/24mis0364-invoice-system'
+         KUBECONFIG = 'C:\\Users\\monis\\.kube\\config'
     }
 
     stages {
@@ -43,12 +44,13 @@ pipeline {
         }
 
         stage('6. Kubernetes Deployment Verification') {
-            steps {
-                bat 'kubectl get deployments'
-                bat 'kubectl get pods'
-                bat 'kubectl get services'
-            }
-        }
+    steps {
+        bat 'kubectl config current-context'
+        bat 'kubectl get deployments'
+        bat 'kubectl get pods'
+        bat 'kubectl get services'
+    }
+}
 
         stage('7. Final Verification') {
             steps {
