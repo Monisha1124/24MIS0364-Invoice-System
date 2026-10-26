@@ -43,14 +43,13 @@ pipeline {
             }
         }
 
-        stage('6. Kubernetes Deployment Verification') {
+       stage('6. Kubernetes Deployment Verification') {
     steps {
         bat 'echo Checking Kubernetes configuration'
-        bat 'echo KUBECONFIG=%KUBECONFIG%'
-        bat 'where kubectl'
-        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config current-context'
-        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config view --minify'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\docker-desktop-kubeconfig.yaml" config current-context'
         bat 'kubectl --kubeconfig "C:\\Users\\monis\\docker-desktop-kubeconfig.yaml" get deployments'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\docker-desktop-kubeconfig.yaml" get pods'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\docker-desktop-kubeconfig.yaml" get services'
     }
 }
 
