@@ -44,12 +44,15 @@ pipeline {
         }
 
         stage('6. Kubernetes Deployment Verification') {
-            steps {
-                bat 'kubectl get deployments'
-                bat 'kubectl get pods'
-                bat 'kubectl get services'
-            }
-        }
+    steps {
+        bat 'echo Checking Kubernetes configuration'
+        bat 'echo KUBECONFIG=%KUBECONFIG%'
+        bat 'where kubectl'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config current-context'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config view --minify'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" get deployments'
+    }
+}
 
         stage('7. Final Verification') {
             steps {
