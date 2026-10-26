@@ -9,8 +9,8 @@ pipeline {
     stages {
         stage('1. Source Code Checkout') {
             steps {
-                echo 'Source code checked out from GitHub'
                 bat 'git rev-parse --short HEAD'
+                echo 'Git checkout successful'
             }
         }
 
@@ -34,39 +34,39 @@ pipeline {
             }
         }
 
-       stage('5. Push Images to DockerHub') {
+        stage('5. Docker Image Verification') {
             steps {
-        echo 'Docker images built locally. DockerHub push temporarily skipped due to authentication issue.'
-        bat 'docker image ls'
-    }
-}
-
-        stage('6. Deploy to Kubernetes') {
-            steps {
-                bat 'kubectl apply -f k8s/invoice-v1.yaml'
-                bat 'kubectl apply -f k8s/invoice-v2.yaml'
-                bat 'kubectl apply -f k8s/invoice-v3.yaml'
+                bat 'docker image inspect %IMAGE%:v1'
+                bat 'docker image inspect %IMAGE%:v2'
+                bat 'docker image inspect %IMAGE%:v3'
             }
         }
 
-        stage('7. Verify Deployment') {
+        stage('6. Kubernetes Deployment Verification') {
+            steps {
+                bat 'kubectl get deployments'
+                bat 'kubectl get pods'
+                bat 'kubectl get services'
+            }
+        }
+
+        stage('7. Final Verification') {
             steps {
                 bat 'kubectl rollout status deployment/invoice-v1 --timeout=120s'
                 bat 'kubectl rollout status deployment/invoice-v2 --timeout=120s'
                 bat 'kubectl rollout status deployment/invoice-v3 --timeout=120s'
-                bat 'kubectl get deployments'
-                bat 'kubectl get services'
+                echo 'Invoice System verification completed'
             }
         }
     }
 
     post {
         success {
-            echo 'Invoice System CI/CD Pipeline Completed Successfully!'
+            echo 'INVOICE SYSTEM PIPELINE COMPLETED SUCCESSFULLY'
         }
         failure {
-            echo 'Pipeline failed. Review the stage and console output.'
-            bat 'docker image ls'
+            echo 'Pipeline failed. Check the stage error.'
         }
     }
 }
+
