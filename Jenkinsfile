@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         IMAGE = 'monisha1124/24mis0364-invoice-system'
+        KUBECONFIG = 'C:\\Users\\monis\\.kube\\config'
     }
 
     stages {
