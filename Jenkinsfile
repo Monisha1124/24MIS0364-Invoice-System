@@ -4,7 +4,7 @@ pipeline {
 
     environment {
         IMAGE = 'monisha1124/24mis0364-invoice-system'
-        KUBECONFIG = 'C:\\Users\\monis\\.kube\\config'
+        KUBECONFIG = 'C:\\Users\\monis\\docker-desktop-kubeconfig.yaml'
     }
 
     stages {
@@ -50,7 +50,7 @@ pipeline {
         bat 'where kubectl'
         bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config current-context'
         bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" config view --minify'
-        bat 'kubectl --kubeconfig "C:\\Users\\monis\\.kube\\config" get deployments'
+        bat 'kubectl --kubeconfig "C:\\Users\\monis\\docker-desktop-kubeconfig.yaml" get deployments'
     }
 }
 
